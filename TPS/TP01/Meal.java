@@ -1,5 +1,13 @@
 package TPS.TP01;
 
+/**
+ * Classe Meal
+ * Banco de dados: daily_food_nutrition_dataset - KAGLE
+ * @author : Gabriel Tamietti Mauro
+ * @author : Pedro Hosken Fernandes Guimarães - 816561
+ */
+
+// ---- Bibliotecas ---- //
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
