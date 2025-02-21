@@ -1,0 +1,50 @@
+Descrição dos Tps:
+
+Os Trabalhos Práticos de AEDS III tem como objetivo permitir que o aluno implemente a representação de entidades em registros, armazene-os em memória secundária e faça a manipulação destes registros através de acesso sequencial, na primeira entrega. 
+
+As demais entregas serão complementos da primeira e deverão contemplar acesso indexado, compressão e criptografia. 
+
+Os trabalhos poderão ser realizados individualmente ou em dupla. 
+
+Os alunos deverão selecionar uma base de dados que permita a identificação de pelo menos um campo de cada um dos tipos abaixo:
+
+Tamanho fixo
+Tamanho variável 
+Data
+Lista de valores com separador a definir
+
+Etapas do TP
+
+Etapa 1: Criação da base de dados, Manipulação de Arquivo Sequencial: Implementação + Vídeo
+Etapa 2: Manipulação de Arquivo Indexado com Árvore B+, Hash e Lista Invertida: Implementação + Vídeo
+Etapa  3: Compactação com Huffman e LZW: Implementação + Vídeo
+Etapa  3: Casamento de Padrões e Criptografia: Implementação + Relatório Final
+
+Vídeos 
+A cada etapa intermediária (1 a 3), o grupo deve criar um vídeo (duração máxima de 10 minutos), com: 
+Explicação das principais decisões de implementação dos códigos criados.
+Demonstração da execução do sistema.
+Testes e resultados realizados.
+
+Entrega final 
+
+Deve ser entregue um relatório (usando LaTeX - utilizar “SBC Conferences Template”) como resultado da realização deste trabalho prático (máximo 10 páginas). Anexo a esse relatório deve ser entregue o projeto do sistema desenvolvido (formato .zip). Esse relatório deve conter a seguinte estrutura:
+Título
+Resumo
+Introdução
+Desenvolvimento
+Testes e Resultados
+Conclusão
+
+
+Critérios para avaliação
+Implementação do sistema 
+Correção e robustez dos programas
+Conformidade às especificações
+Clareza de codificação
+Critérios de escolha
+Documentação 
+Vídeo 
+NOTA FINAL = Implementação x Documentação x Vídeo
+
+
