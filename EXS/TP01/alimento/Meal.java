@@ -1,4 +1,5 @@
-package TPS.TP01;
+package EXS.TP01.alimento;
+
 
 /**
  * Classe Meal
