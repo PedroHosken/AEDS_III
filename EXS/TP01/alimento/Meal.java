@@ -8,6 +8,11 @@ package EXS.TP01.alimento;
  */
 
 // ---- Bibliotecas ---- //
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -86,6 +91,56 @@ public class Meal {
                 "\nColesterol:" + colesterol +
                 "\nRefeição:" + tipo +
                 "\nLiquido:" + liquido;
+    }
+
+    /**
+     * Byte to bytearray
+     * 
+     * Metódo da Classe para escrever um objeto com seus atributos já em BYTE.
+     * 
+     */
+
+    public byte[] toByteArray() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(); // conversão em byte
+        DataOutputStream dos = new DataOutputStream(baos); // escrita dos dados
+
+        // Escrever cada Atributo
+        dos.writeLong(data.getTime()); // Grava a data como long (milissegundos)
+        dos.writeInt(usuario);
+        dos.writeUTF(alimento);
+        dos.writeUTF(categoria);
+        dos.writeInt(caloria);
+        dos.writeDouble(proteina);
+        dos.writeDouble(carboidrato);
+        dos.writeDouble(gordura);
+        dos.writeDouble(fibra);
+        dos.writeDouble(acucar);
+        dos.writeInt(sodio);
+        dos.writeInt(colesterol);
+        dos.writeUTF(tipo);
+        dos.writeInt(liquido);
+
+        // retornar vetor de bytes
+
+        return baos.toByteArray();
+
+    }
+
+    /**
+     * Metódo fromByteArray
+     * Objetivo: ler de um arquivo de bytes, e formar o objeto a partir dele.
+     * 
+     */
+
+    public void fromByteArray(byte[] ba) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(ba); // para ler do arquivo
+        DataInputStream dis = new DataInputStream(bais); // para tratar os dados
+
+        // ler cada atributo do arquivo
+
+        // Lê o valor long correspondente à data e converte para Date
+        long timestamp = dis.readLong();
+        data = new Date(timestamp);
     }
 
 }
