@@ -1,74 +1,91 @@
 package EXS.TP01.alimento;
 
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
+/**
+ * Método Main - Teste de Classe Meal
+ * Banco de dados: daily_food_nutrition_dataset - KAGGLE
+ * Autores:
+ *    Gabriel Tamietti Mauro
+ *    Pedro Hosken Fernandes Guimarães - 816561
+ */
+
+// ---- Bibliotecas ---- //
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
-import java.text.DateFormat;
+import java.io.FileOutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
+        // Formatação da Data: definindo a data desejada (27/02/2025)
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Date dataDesejada = sdf.parse("27/02/2025");
 
-        Meal r1 = new Meal();
-        Meal r2 = new Meal();
-        Meal r3 = new Meal();
+        // Instanciando a Meal com valores exemplares
+        Meal r1 = new Meal(
+            1, "Bolo de Chocolate", "Sobremesa", 250, 4.5, 35.0,
+            10.0, 2.0, 20.0, 300, 15, "Lanche", 100, dataDesejada);
 
-        // Gravando os dados dos Meales em um arquivo binário
-        FileOutputStream arq; // arquivo de saída
-        DataOutputStream dos; // fluxo de saída de dados
-
-        // Lendo os dados dos Meales de um arquivo binário
-        FileInputStream arq2; // arquivo de entrada
-        DataInputStream dis; // fluxo de entrada de dados
-
+        // --- Gravando os dados de r1 em um arquivo binário ---
         try {
+            FileOutputStream arq = new FileOutputStream("Meal_ds.db");
+            DataOutputStream dos = new DataOutputStream(arq);
 
-            arq = new FileOutputStream("../dados/Meales_ds.db");
-            dos = new DataOutputStream(arq); // conecta o fluxo de saída de dados ao arquivo
-
-            dos.writeInt(j1.idMeal);
-            dos.writeUTF(j1.nome);
-            dos.writeFloat(j1.pontos);
-
-            dos.writeInt(j2.idMeal);
-            dos.writeUTF(j2.nome);
-            dos.writeFloat(j2.pontos);
-
-            dos.writeInt(j3.idMeal);
-            dos.writeUTF(j3.nome);
-            dos.writeFloat(j3.pontos);
+            // Gravando os atributos de Meal em uma ordem definida
+            dos.writeInt(r1.usuario);
+            dos.writeUTF(r1.alimento);
+            dos.writeUTF(r1.categoria);
+            dos.writeInt(r1.caloria);
+            dos.writeDouble(r1.proteina);
+            dos.writeDouble(r1.carboidrato);
+            dos.writeDouble(r1.gordura);
+            dos.writeDouble(r1.fibra);
+            dos.writeDouble(r1.acucar);
+            dos.writeInt(r1.sodio);
+            dos.writeInt(r1.colesterol);
+            dos.writeUTF(r1.tipo);
+            dos.writeInt(r1.liquido);
+            // Para a data, grava o timestamp (milissegundos desde 1 de janeiro de 1970)
+            dos.writeLong(r1.data.getTime());
 
             dos.close();
             arq.close();
-
-            Meal j_temp = new Meal();
-
-            arq2 = new FileInputStream("../dados/Meales_ds.db");
-            dis = new DataInputStream(arq2); // conecta o fluxo de entrada de dados ao arquivo
-
-            j_temp.idMeal = dis.readInt();
-            j_temp.nome = dis.readUTF();
-            j_temp.pontos = dis.readFloat();
-            System.out.println(j_temp);
-
-            j_temp.idMeal = dis.readInt();
-            j_temp.nome = dis.readUTF();
-            j_temp.pontos = dis.readFloat();
-            System.out.println(j_temp);
-
-            j_temp.idMeal = dis.readInt();
-            j_temp.nome = dis.readUTF();
-            j_temp.pontos = dis.readFloat();
-            System.out.println(j_temp);
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Dados gravados com sucesso!");
+        } catch(Exception e) {
+            System.out.println("Erro ao gravar arquivo: " + e.getMessage());
         }
 
-    }
+        // --- Lendo os dados do arquivo binário e reconstruindo um objeto Meal ---
+        try {
+            FileInputStream arq2 = new FileInputStream("Meal_ds.db");
+            DataInputStream dis = new DataInputStream(arq2);
 
+            Meal r_temp = new Meal();
+            r_temp.usuario = dis.readInt();
+            r_temp.alimento = dis.readUTF();
+            r_temp.categoria = dis.readUTF();
+            r_temp.caloria = dis.readInt();
+            r_temp.proteina = dis.readDouble();
+            r_temp.carboidrato = dis.readDouble();
+            r_temp.gordura = dis.readDouble();
+            r_temp.fibra = dis.readDouble();
+            r_temp.acucar = dis.readDouble();
+            r_temp.sodio = dis.readInt();
+            r_temp.colesterol = dis.readInt();
+            r_temp.tipo = dis.readUTF();
+            r_temp.liquido = dis.readInt();
+            // Reconstruindo a data a partir do long lido
+            r_temp.data = new Date(dis.readLong());
+
+            dis.close();
+            arq2.close();
+
+            System.out.println("Dados lidos do arquivo:");
+            System.out.println(r_temp);
+        } catch(Exception e) {
+            System.out.println("Erro ao ler arquivo: " + e.getMessage());
+        }
+    }
 }
