@@ -1,6 +1,5 @@
 package EXS.TP01.alimento;
 
-
 /**
  * Classe Meal
  * Banco de dados: daily_food_nutrition_dataset - KAGLE
@@ -34,6 +33,7 @@ public class Meal {
 
     // ---- Construtor Padrão ---- //
     public Meal() {
+        this.data = null;
         this.usuario = 0;
         this.alimento = "";
         this.categoria = "";
@@ -47,14 +47,14 @@ public class Meal {
         this.colesterol = 0;
         this.tipo = "";
         this.liquido = 0;
-        this.data = null;
 
     }
 
     // ---- Construtor Passagem de Parametros ---- //
-    public Meal(int usuario, String alimento, String categoria, int caloria, double proteina, double carboidrato,
-            double gordura, double fibra, double acucar, int sodio, int colesterol, String tipo, int liquido,
-            Date data) {
+    public Meal(Date data, int usuario, String alimento, String categoria, int caloria, double proteina,
+            double carboidrato,
+            double gordura, double fibra, double acucar, int sodio, int colesterol, String tipo, int liquid) {
+        this.data = data;
         this.usuario = usuario;
         this.alimento = alimento;
         this.categoria = categoria;
@@ -68,13 +68,12 @@ public class Meal {
         this.colesterol = colesterol;
         this.tipo = tipo;
         this.liquido = liquido;
-        this.data = data;
-
     }
 
     public String toString() {
         DecimalFormat df = new DecimalFormat("#,##0.00");// formata o valor dos pontos
-        return "\nID:" + usuario +
+        return "\nData:" + new SimpleDateFormat("dd/MM/yyyy").format(data) +
+                "\nID:" + usuario +
                 "\nAlimento:" + alimento +
                 "\nCategoria:" + categoria +
                 "\nCalorias:" + caloria +
@@ -86,8 +85,7 @@ public class Meal {
                 "\nSodio:" + sodio +
                 "\nColesterol:" + colesterol +
                 "\nRefeição:" + tipo +
-                "\nLiquido:" + liquido +
-                "\nData:" + new SimpleDateFormat("dd/MM/yyyy").format(data);
+                "\nLiquido:" + liquido;
     }
 
 }
