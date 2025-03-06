@@ -31,28 +31,8 @@ public class Main {
         // --- Gravando os dados de r1 em um arquivo binário ---
         try {
             FileOutputStream arq = new FileOutputStream("Meal_ds.db");
-            DataOutputStream dos = new DataOutputStream(arq);
-
-            // Gravando os atributos de Meal em uma ordem definida
-            // Para a data, grava o timestamp (milissegundos desde 1 de janeiro de 1970)
-            dos.writeLong(r1.data.getTime());
-
-            dos.writeInt(r1.usuario);
-            dos.writeUTF(r1.alimento);
-            dos.writeUTF(r1.categoria);
-            dos.writeInt(r1.caloria);
-            dos.writeDouble(r1.proteina);
-            dos.writeDouble(r1.carboidrato);
-            dos.writeDouble(r1.gordura);
-            dos.writeDouble(r1.fibra);
-            dos.writeDouble(r1.acucar);
-            dos.writeInt(r1.sodio);
-            dos.writeInt(r1.colesterol);
-            dos.writeUTF(r1.tipo);
-            dos.writeInt(r1.liquido);
-
-            dos.close();
-            arq.close();
+            arq.write(r1.toByteArray()); // uso de metódo da classe para escrita
+            arq.close(); // fechar arquivo
             System.out.println("Dados gravados com sucesso!");
         } catch (Exception e) {
             System.out.println("Erro ao gravar arquivo: " + e.getMessage());
@@ -61,26 +41,7 @@ public class Main {
         // --- Lendo os dados do arquivo binário e reconstruindo um objeto Meal ---
         try {
             FileInputStream arq2 = new FileInputStream("Meal_ds.db");
-            DataInputStream dis = new DataInputStream(arq2);
-
-            Meal r_temp = new Meal();
-            // Reconstruindo a data a partir do long lido
-            r_temp.data = new Date(dis.readLong());
-            r_temp.usuario = dis.readInt();
-            r_temp.alimento = dis.readUTF();
-            r_temp.categoria = dis.readUTF();
-            r_temp.caloria = dis.readInt();
-            r_temp.proteina = dis.readDouble();
-            r_temp.carboidrato = dis.readDouble();
-            r_temp.gordura = dis.readDouble();
-            r_temp.fibra = dis.readDouble();
-            r_temp.acucar = dis.readDouble();
-            r_temp.sodio = dis.readInt();
-            r_temp.colesterol = dis.readInt();
-            r_temp.tipo = dis.readUTF();
-            r_temp.liquido = dis.readInt();
-
-            dis.close();
+            byte[] ba = new byte[]; // Parei aqui
             arq2.close();
 
             System.out.println("Dados lidos do arquivo:");
@@ -90,3 +51,52 @@ public class Main {
         }
     }
 }
+
+/**
+ * TESTES
+ * 1- Remover o DOS
+ * DataOutputStream dos = new DataOutputStream(arq);
+ * 
+ * // Gravando os atributos de Meal em uma ordem definida
+ * // Para a data, grava o timestamp (milissegundos desde 1 de janeiro de 1970)
+ * dos.writeLong(r1.data.getTime());
+ * 
+ * dos.writeInt(r1.usuario);
+ * dos.writeUTF(r1.alimento);
+ * dos.writeUTF(r1.categoria);
+ * dos.writeInt(r1.caloria);
+ * dos.writeDouble(r1.proteina);
+ * dos.writeDouble(r1.carboidrato);
+ * dos.writeDouble(r1.gordura);
+ * dos.writeDouble(r1.fibra);
+ * dos.writeDouble(r1.acucar);
+ * dos.writeInt(r1.sodio);
+ * dos.writeInt(r1.colesterol);
+ * dos.writeUTF(r1.tipo);
+ * dos.writeInt(r1.liquido);
+ * 
+ * dos.close();
+ * 
+ * 
+ * 2- remoção do DIS
+ * DataInputStream dis = new DataInputStream(arq2);
+ * 
+ * Meal r_temp = new Meal();
+ * // Reconstruindo a data a partir do long lido
+ * r_temp.data = new Date(dis.readLong());
+ * r_temp.usuario = dis.readInt();
+ * r_temp.alimento = dis.readUTF();
+ * r_temp.categoria = dis.readUTF();
+ * r_temp.caloria = dis.readInt();
+ * r_temp.proteina = dis.readDouble();
+ * r_temp.carboidrato = dis.readDouble();
+ * r_temp.gordura = dis.readDouble();
+ * r_temp.fibra = dis.readDouble();
+ * r_temp.acucar = dis.readDouble();
+ * r_temp.sodio = dis.readInt();
+ * r_temp.colesterol = dis.readInt();
+ * r_temp.tipo = dis.readUTF();
+ * r_temp.liquido = dis.readInt();
+ * 
+ * dis.close();
+ */

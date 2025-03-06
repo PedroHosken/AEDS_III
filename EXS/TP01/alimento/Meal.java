@@ -137,10 +137,21 @@ public class Meal {
         DataInputStream dis = new DataInputStream(bais); // para tratar os dados
 
         // ler cada atributo do arquivo
-
-        // Lê o valor long correspondente à data e converte para Date
-        long timestamp = dis.readLong();
+        long timestamp = dis.readLong(); // Lê o valor long correspondente à data e converte para Date
         data = new Date(timestamp);
+        usuario = dis.readInt();
+        alimento = dis.readUTF();
+        categoria = dis.readUTF();
+        caloria = dis.readInt();
+        proteina = dis.readDouble();
+        carboidrato = dis.readDouble();
+        gordura = dis.readDouble();
+        fibra = dis.readDouble();
+        acucar = dis.readDouble();
+        sodio = dis.readInt();
+        colesterol = dis.readInt();
+        tipo = dis.readUTF();
+        liquido = dis.readInt();
     }
 
 }
