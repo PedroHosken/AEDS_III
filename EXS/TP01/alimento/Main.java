@@ -28,20 +28,34 @@ public class Main {
                 1, "Bolo de Chocolate", "Sobremesa", 250, 4.5, 35.0,
                 10.0, 2.0, 20.0, 300, 15, "Lanche", 100);
 
-        // --- Gravando os dados de r1 em um arquivo binário ---
+        // Declaração Externa
+        byte[] ba;
+
+        // --- Gravando os dados de r1 em um arquivo binário --- //
         try {
             FileOutputStream arq = new FileOutputStream("Meal_ds.db");
-            arq.write(r1.toByteArray()); // uso de metódo da classe para escrita
+            DataOutputStream dos = new DataOutputStream(arq);
+            ba = r1.toByteArray();
+            dos.writeInt(ba.length); // comprimento total do registro
+            dos.write(ba); // escrever o vetor de bytes
             arq.close(); // fechar arquivo
             System.out.println("Dados gravados com sucesso!");
         } catch (Exception e) {
             System.out.println("Erro ao gravar arquivo: " + e.getMessage());
         }
 
-        // --- Lendo os dados do arquivo binário e reconstruindo um objeto Meal ---
+        // Declaração Externa
+        int tam;
+        DataInputStream dis;
+        Meal r_temp = new Meal(); // inicializa temporário
+        // --- Lendo os dados do arquivo binário e reconstruindo um objeto Meal --- //
         try {
             FileInputStream arq2 = new FileInputStream("Meal_ds.db");
-            byte[] ba = new byte[]; // Parei aqui
+            dis = new DataInputStream(arq2);
+            tam = dis.readInt(); // passa tamanho do registro
+            byte[] bb = new byte[tam]; // vetor de bytes com o tamanho do registro
+            dis.read(bb); // leitura do vetor de bytes
+            r_temp.fromByteArray(bb); // passa para objeto
             arq2.close();
 
             System.out.println("Dados lidos do arquivo:");
