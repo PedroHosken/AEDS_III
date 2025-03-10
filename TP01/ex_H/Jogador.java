@@ -1,4 +1,4 @@
-package EXS.TP01.ex_H;
+package TP01.ex_H;
 
 import java.text.DecimalFormat;
 
