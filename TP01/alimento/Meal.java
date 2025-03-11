@@ -1,4 +1,4 @@
-package EXS.TP01.alimento;
+package TP01.alimento;
 
 /**
  * Classe Meal
@@ -58,7 +58,7 @@ public class Meal {
     // ---- Construtor Passagem de Parametros ---- //
     public Meal(Date data, int usuario, String alimento, String categoria, int caloria, double proteina,
             double carboidrato,
-            double gordura, double fibra, double acucar, int sodio, int colesterol, String tipo, int liquid) {
+            double gordura, double fibra, double acucar, int sodio, int colesterol, String tipo, int liquido) {
         this.data = data;
         this.usuario = usuario;
         this.alimento = alimento;
@@ -153,5 +153,10 @@ public class Meal {
         tipo = dis.readUTF();
         liquido = dis.readInt();
     }
+    public int getUserId() {
+        return usuario;
+    }
+    
 
 }
+
