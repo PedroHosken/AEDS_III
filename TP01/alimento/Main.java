@@ -7,7 +7,6 @@ package TP01.alimento;
  *    Gabriel Tamietti Mauro - 800829
  *    Pedro Hosken Fernandes Guimarães - 816561
  */
-
 // ---- Bibliotecas ---- //
 import java.io.*;
 import java.nio.file.*;
@@ -48,15 +47,16 @@ public class Main {
    
     //=============================Carregar CSV para conversão em arquivo binário (Opção 1)===============================//
    private static void carregarCSV() throws IOException {
+
+    Files.deleteIfExists(Paths.get(BIN_FILE));
+    
     try (BufferedReader br = Files.newBufferedReader(Paths.get(CSV_FILE));
          RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "rw")) {
 
         String linha;
-        
-        // Ler o cabeçalho do arquivo binário
-        raf.seek(0);
-        int ultimoId = raf.readInt();  // Obter o último ID utilizado
-        int id = ultimoId + 1;         // O próximo ID será o último ID + 1
+
+        int id = 1;
+        raf.writeInt(0);
 
         br.readLine();  
 
@@ -65,19 +65,19 @@ public class Main {
             try {
                 Meal meal = new Meal(
                     new SimpleDateFormat("yyyy-MM-dd").parse(campos[0]),
-                    id,
-                    campos[1],
+                    parseIntOrDefault(campos[1]),
                     campos[2],
-                    parseIntOrDefault(campos[3]),
-                    parseDoubleOrDefault(campos[4]),
+                    campos[3],
+                    parseIntOrDefault(campos[4]),
                     parseDoubleOrDefault(campos[5]),
                     parseDoubleOrDefault(campos[6]),
                     parseDoubleOrDefault(campos[7]),
                     parseDoubleOrDefault(campos[8]),
-                    parseIntOrDefault(campos[9]),
+                    parseDoubleOrDefault(campos[9]),
                     parseIntOrDefault(campos[10]),
-                    campos[11],
-                    parseIntOrDefault(campos[12])
+                    parseIntOrDefault(campos[11]),
+                    campos[12],
+                    parseIntOrDefault(campos[13])
                 );
 
                 byte[] data = meal.toByteArray();
@@ -90,6 +90,8 @@ public class Main {
                 // Atualiza o último ID utilizado
                 raf.seek(0);
                 raf.writeInt(id);
+
+                
 
                 // Incrementa o ID para a próxima refeição
                 id++;
@@ -153,45 +155,106 @@ private static double parseDoubleOrDefault(String str) {
     private static void atualizarRegistro() throws IOException {
         System.out.print("Informe o ID para atualizar: ");
         int id = scanner.nextInt();
-
+        scanner.nextLine(); 
+    
         try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "rw")) {
-            raf.seek(4); 
+            raf.seek(4);
+    
             while (raf.getFilePointer() < raf.length()) {
                 long pos = raf.getFilePointer();
                 byte lapide = raf.readByte();
                 int tamanho = raf.readInt();
                 byte[] data = new byte[tamanho];
                 raf.read(data);
-
-                if (lapide == 1) {
+    
+                if (lapide == 1) { // Apenas registros ativos
                     Meal meal = new Meal();
                     meal.fromByteArray(data);
-                    if (meal.usuario == id) {
-                        System.out.print("Digite o novo tipo de refeição: ");
-                        scanner.nextLine(); 
-                        meal.tipo = scanner.nextLine();
+    
+                    if (meal.usuario == id) { // Atualiza todos com esse usuário
+                        System.out.println("Digite os novos valores para a refeição (deixe em branco para manter o atual):");
+    
+                        System.out.println("Nova Data: ");
+                        String novaDataStr = scanner.nextLine();
+                        if (!novaDataStr.isEmpty()){
+                            SimpleDateFormat nova_data = new SimpleDateFormat("dd/MM/yyyy");
+                            meal.data = nova_data.parse(novaDataStr);
+                        }
+                        
 
+                        System.out.print("Novo alimento: ");
+                        String novoAlimento = scanner.nextLine();
+                        if (!novoAlimento.isEmpty()) meal.alimento = novoAlimento;
+    
+                        System.out.print("Nova categoria: ");
+                        String novaCategoria = scanner.nextLine();
+                        if (!novaCategoria.isEmpty()) meal.categoria = novaCategoria;
+    
+                        System.out.print("Nova caloria: ");
+                        String novaCaloria = scanner.nextLine();
+                        if (!novaCaloria.isEmpty()) meal.caloria = Integer.parseInt(novaCaloria);
+    
+                        System.out.print("Nova proteína: ");
+                        String novaProteina = scanner.nextLine();
+                        if (!novaProteina.isEmpty()) meal.proteina = Double.parseDouble(novaProteina);
+    
+                        System.out.print("Novo carboidrato: ");
+                        String novoCarbo = scanner.nextLine();
+                        if (!novoCarbo.isEmpty()) meal.carboidrato = Double.parseDouble(novoCarbo);
+    
+                        System.out.print("Nova gordura: ");
+                        String novaGordura = scanner.nextLine();
+                        if (!novaGordura.isEmpty()) meal.gordura = Double.parseDouble(novaGordura);
+    
+                        System.out.print("Nova fibra: ");
+                        String novaFibra = scanner.nextLine();
+                        if (!novaFibra.isEmpty()) meal.fibra = Double.parseDouble(novaFibra);
+    
+                        System.out.print("Novo açúcar: ");
+                        String novoAcucar = scanner.nextLine();
+                        if (!novoAcucar.isEmpty()) meal.acucar = Double.parseDouble(novoAcucar);
+    
+                        System.out.print("Novo sódio: ");
+                        String novoSodio = scanner.nextLine();
+                        if (!novoSodio.isEmpty()) meal.sodio = Integer.parseInt(novoSodio);
+    
+                        System.out.print("Novo colesterol: ");
+                        String novoColesterol = scanner.nextLine();
+                        if (!novoColesterol.isEmpty()) meal.colesterol = Integer.parseInt(novoColesterol);
+    
+                        System.out.print("Novo tipo: ");
+                        String novoTipo = scanner.nextLine();
+                        if (!novoTipo.isEmpty()) meal.tipo = novoTipo;
+    
+                        System.out.print("Novo líquido: ");
+                        String novoLiquido = scanner.nextLine();
+                        if (!novoLiquido.isEmpty()) meal.liquido = Integer.parseInt(novoLiquido);
+    
+                        // Gerar novo array de bytes
                         byte[] novoData = meal.toByteArray();
-                        if (novoData.length == data.length) {
-                            raf.seek(pos + 5);
+    
+                        if (novoData.length <= data.length) {
+                            // Atualizar no mesmo espaço se couber
+                            raf.seek(pos + 5); // Volta para posição exata do dado (pula lápide e tamanho)
                             raf.write(novoData);
                         } else {
+                            // Caso não caiba, marcar o atual como inativo e mover para o final
                             raf.seek(pos);
-                            raf.writeByte(0);
-                            raf.seek(raf.length());
-                            raf.writeByte(1);
+                            raf.writeByte(0); // Marca como inativo
+                            raf.seek(raf.length()); // Ir para o final
+                            raf.writeByte(1); // Nova lápide ativa
                             raf.writeInt(novoData.length);
                             raf.write(novoData);
                         }
-                        System.out.println("Registro atualizado com sucesso!");
-                        return;
                     }
                 }
             }
-            System.out.println("Registro não encontrado.");
+            System.out.println("Registros atualizados com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro ao atualizar registros: " + e.getMessage());
         }
     }
-
+    
     
     //=============================Deletar Registro (Opção 4)===============================//
     private static void deletarRegistro() throws IOException {
@@ -220,5 +283,11 @@ private static double parseDoubleOrDefault(String str) {
             }
             System.out.println("Registro não encontrado.");
         }
+    }
+    //=======================realizar ordenação externa (Opção 5)=================================//
+    private static void ordenacaoExterna() throws IOException{
+
+
+
     }
 }
