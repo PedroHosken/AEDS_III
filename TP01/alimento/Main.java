@@ -29,6 +29,7 @@ public class Main {
             System.out.println("2. Ler Registro");
             System.out.println("3. Atualizar Registro");
             System.out.println("4. Deletar Registro");
+            System.out.println("5. Ordenação Externa");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
             opcao = scanner.nextInt();
@@ -38,6 +39,15 @@ public class Main {
                 case 2 : lerRegistro(); break;
                 case 3 : atualizarRegistro(); break;
                 case 4 : deletarRegistro(); break;
+                case 5 :
+                    System.out.println("Digite o número de arquivos que voce deseja usar: ");
+                    int numCaminhos = scanner.nextInt();
+    
+                    System.out.println("Digite o número de registros que voce deseja usar: ");
+                    int maxRegistros = scanner.nextInt();
+
+                    ordenacaoExterna(numCaminhos, maxRegistros); break;
+                    
                 case 0 : System.out.println("Saindo..."); break;
                 default : System.out.println("Opção inválida!"); break;
             }
@@ -285,9 +295,119 @@ private static double parseDoubleOrDefault(String str) {
         }
     }
     //=======================realizar ordenação externa (Opção 5)=================================//
-    private static void ordenacaoExterna() throws IOException{
-
-
-
+    private static void ordenacaoExterna(int numCaminhos, int maxRegistros) throws IOException {
+        List<File> arquivosTemporarios = new ArrayList<>();
+    
+        try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "r")) {
+            raf.seek(4); // Pula o cabeçalho do arquivo
+    
+            List<Meal> buffer = new ArrayList<>();
+            while (raf.getFilePointer() < raf.length()) {
+                long pos = raf.getFilePointer();
+                byte lapide = raf.readByte();
+                int tamanho = raf.readInt();
+                byte[] data = new byte[tamanho];
+                raf.read(data);
+    
+                if (lapide == 1) { // Ignora registros deletados
+                    Meal meal = new Meal();
+                    meal.fromByteArray(data);
+                    buffer.add(meal);
+                }
+    
+                if (buffer.size() >= maxRegistros) {
+                    arquivosTemporarios.add(escreverArquivoTemporario(buffer));
+                    buffer.clear();
+                }
+            }
+    
+            if (!buffer.isEmpty()) {
+                arquivosTemporarios.add(escreverArquivoTemporario(buffer));
+            }
+        }
+    
+        // Intercalação dos arquivos ordenados
+        intercalarArquivos(arquivosTemporarios, numCaminhos);
+        
+        // Limpeza dos arquivos temporários
+        for (File tempFile : arquivosTemporarios) {
+            tempFile.delete();
+        }
     }
+    
+    private static File escreverArquivoTemporario(List<Meal> registros) throws IOException {
+        registros.sort(Comparator.comparingInt(m -> m.usuario)); 
+        File tempFile = File.createTempFile("temp", ".bin");
+    
+        try (RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
+            for (Meal meal : registros) {
+                byte[] data = meal.toByteArray();
+                raf.writeByte(1);  // Mantém ativo
+                raf.writeInt(data.length);
+                raf.write(data);
+            }
+        }
+        return tempFile;
+    }
+    
+    private static void intercalarArquivos(List<File> arquivos, int numCaminhos) throws IOException {
+        PriorityQueue<DataPointer> fila = new PriorityQueue<>(Comparator.comparingInt(dp -> dp.meal.usuario));
+        List<RandomAccessFile> readers = new ArrayList<>();
+    
+        try (RandomAccessFile rafFinal = new RandomAccessFile(BIN_FILE, "rw")) {
+            rafFinal.setLength(0);
+            rafFinal.writeInt(0); 
+    
+            for (File arquivo : arquivos) {
+                RandomAccessFile raf = new RandomAccessFile(arquivo, "r");
+                readers.add(raf);
+                carregarProximoRegistro(raf, fila);
+            }
+    
+            while (!fila.isEmpty()) {
+                DataPointer dp = fila.poll();
+                byte[] data = dp.meal.toByteArray();
+    
+                rafFinal.writeByte(1);
+                rafFinal.writeInt(data.length);
+                rafFinal.write(data);
+    
+                if (dp.reader.getFilePointer() < dp.reader.length()) {
+                    carregarProximoRegistro(dp.reader, fila);
+                } else {
+                    dp.reader.close();
+                }
+            }
+        }
+    
+        for (RandomAccessFile raf : readers) {
+            raf.close();
+        }
+    }
+    
+    private static void carregarProximoRegistro(RandomAccessFile raf, PriorityQueue<DataPointer> fila) throws IOException {
+        long pos = raf.getFilePointer();
+        byte lapide = raf.readByte();
+        int tamanho = raf.readInt();
+        byte[] data = new byte[tamanho];
+        raf.read(data);
+    
+        if (lapide == 1) {
+            Meal meal = new Meal();
+            meal.fromByteArray(data);
+            fila.add(new DataPointer(meal, raf));
+        }
+    }
+    
+    private static class DataPointer {
+        Meal meal;
+        RandomAccessFile reader;
+    
+        DataPointer(Meal meal, RandomAccessFile reader) {
+            this.meal = meal;
+            this.reader = reader;
+        }
+    }
+    
+    
 }
