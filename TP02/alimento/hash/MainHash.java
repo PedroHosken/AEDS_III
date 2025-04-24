@@ -213,37 +213,100 @@ public class MainHash {
             Meal meal = new Meal();
             meal.fromByteArray(dadosAntigos);
 
+            System.out.println("Digite os novos valores (pressione ENTER para manter):");
+
+            System.out.print("Nova Data (dd/MM/yyyy): ");
+            String novaDataStr = scanner.nextLine();
+            if (!novaDataStr.isEmpty()) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                meal.data = sdf.parse(novaDataStr);
+            }
+
             System.out.print("Novo alimento: ");
-            String alimento = scanner.nextLine();
-            if (!alimento.isEmpty())
-                meal.alimento = alimento;
+            String novoAlimento = scanner.nextLine();
+            if (!novoAlimento.isEmpty())
+                meal.alimento = novoAlimento;
 
             System.out.print("Nova categoria: ");
-            String categoria = scanner.nextLine();
-            if (!categoria.isEmpty())
-                meal.categoria = categoria;
+            String novaCategoria = scanner.nextLine();
+            if (!novaCategoria.isEmpty())
+                meal.categoria = novaCategoria;
+
+            System.out.print("Nova caloria: ");
+            String novaCaloria = scanner.nextLine();
+            if (!novaCaloria.isEmpty())
+                meal.caloria = Integer.parseInt(novaCaloria);
+
+            System.out.print("Nova proteína: ");
+            String novaProteina = scanner.nextLine();
+            if (!novaProteina.isEmpty())
+                meal.proteina = Double.parseDouble(novaProteina);
+
+            System.out.print("Novo carboidrato: ");
+            String novoCarbo = scanner.nextLine();
+            if (!novoCarbo.isEmpty())
+                meal.carboidrato = Double.parseDouble(novoCarbo);
+
+            System.out.print("Nova gordura: ");
+            String novaGordura = scanner.nextLine();
+            if (!novaGordura.isEmpty())
+                meal.gordura = Double.parseDouble(novaGordura);
+
+            System.out.print("Nova fibra: ");
+            String novaFibra = scanner.nextLine();
+            if (!novaFibra.isEmpty())
+                meal.fibra = Double.parseDouble(novaFibra);
+
+            System.out.print("Novo açúcar: ");
+            String novoAcucar = scanner.nextLine();
+            if (!novoAcucar.isEmpty())
+                meal.acucar = Double.parseDouble(novoAcucar);
+
+            System.out.print("Novo sódio: ");
+            String novoSodio = scanner.nextLine();
+            if (!novoSodio.isEmpty())
+                meal.sodio = Integer.parseInt(novoSodio);
+
+            System.out.print("Novo colesterol: ");
+            String novoColesterol = scanner.nextLine();
+            if (!novoColesterol.isEmpty())
+                meal.colesterol = Integer.parseInt(novoColesterol);
+
+            System.out.print("Novo tipo: ");
+            String novoTipo = scanner.nextLine();
+            if (!novoTipo.isEmpty())
+                meal.tipo = novoTipo;
+
+            System.out.print("Novo líquido: ");
+            String novoLiquido = scanner.nextLine();
+            if (!novoLiquido.isEmpty())
+                meal.liquido = Integer.parseInt(novoLiquido);
 
             byte[] dadosNovos = meal.toByteArray();
 
             if (dadosNovos.length <= dadosAntigos.length) {
-                raf.seek(entradaOriginal.getPosicaoArquivo() + 5); // pula lápide + tamanho
+                raf.seek(entradaOriginal.getPosicaoArquivo() + 5); // pula lápide e tamanho
                 raf.write(dadosNovos);
             } else {
+                // marca como removido
                 raf.seek(entradaOriginal.getPosicaoArquivo());
-                raf.writeByte(0); // marca antigo como removido
+                raf.writeByte(0);
 
+                // grava novo no final do arquivo
                 long novaPos = raf.length();
                 raf.seek(novaPos);
                 raf.writeByte(1);
                 raf.writeInt(dadosNovos.length);
                 raf.write(dadosNovos);
 
+                // atualiza posição da entrada
                 entradaOriginal.setPosicaoArquivo(novaPos);
             }
 
-            System.out.println("Registro atualizado.");
+            System.out.println("Registro atualizado com sucesso!");
+
         } catch (Exception e) {
-            System.out.println("Erro ao atualizar: " + e.getMessage());
+            System.out.println("Erro ao atualizar registro: " + e.getMessage());
         }
     }
 
