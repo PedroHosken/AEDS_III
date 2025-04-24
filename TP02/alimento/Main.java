@@ -13,6 +13,8 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import TP02.alimento.arvore.ArvoreB;
+
 public class Main {
     
     // Definição dos PATHS

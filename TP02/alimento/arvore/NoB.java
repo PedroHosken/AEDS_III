@@ -1,4 +1,4 @@
-package TP02.alimento;
+package TP02.alimento.arvore;
 
 import java.io.Serializable;
 
