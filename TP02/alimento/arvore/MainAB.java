@@ -1,4 +1,4 @@
-package TP02.alimento;
+package TP02.alimento.arvore;
 
 /**
  * Método Main - Teste de Classe Meal
@@ -13,9 +13,9 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import TP02.alimento.arvore.ArvoreB;
+import TP02.alimento.hash.Meal;
 
-public class Main {
+public class MainAB {
     
     // Definição dos PATHS
     private static final String CSV_FILE = "TP01/alimento/daily_food_nutrition_dataset.csv";
