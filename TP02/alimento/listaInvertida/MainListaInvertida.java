@@ -22,6 +22,7 @@ public class MainListaInvertida {
             System.out.println("2. Buscar por Termo");
             System.out.println("3. Atualizar Registro");
             System.out.println("4. Deletar Registro");
+            System.out.println("5. Buscar por Múltiplos Termos");
             System.out.println("0. Sair");
             System.out.print("Escolha: ");
             opcao = scanner.nextInt();
@@ -39,6 +40,9 @@ public class MainListaInvertida {
                     break;
                 case 4:
                     deletarRegistro();
+                    break;
+                case 5:
+                    buscarMultiplosTermos();
                     break;
                 case 0:
                     System.out.println("Saindo...");
@@ -112,9 +116,9 @@ public class MainListaInvertida {
     }
 
     private static void atualizarRegistro() {
-        System.out.print("Informe o ID para atualizar o alimento: ");
+        System.out.print("Informe o ID para atualizar: ");
         int id = scanner.nextInt();
-        scanner.nextLine();
+        scanner.nextLine(); // Consumir quebra de linha
 
         Meal meal = registros.get(id);
         if (meal == null) {
@@ -122,17 +126,105 @@ public class MainListaInvertida {
             return;
         }
 
-        listaAlimento.removerAlimento(meal.alimento, meal.getUserId());
+        String alimentoAntigo = meal.alimento; // Guardar o alimento antigo
 
-        System.out.print("Novo alimento: ");
-        String novoAlimento = scanner.nextLine();
-        if (!novoAlimento.isEmpty()) {
-            meal.alimento = novoAlimento;
+        System.out.println("Digite os novos valores (pressione ENTER para manter o valor atual):");
+
+        try {
+            System.out.print("Nova Data (dd/MM/yyyy): ");
+            String novaDataStr = scanner.nextLine();
+            if (!novaDataStr.isEmpty()) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                meal.data = sdf.parse(novaDataStr);
+            }
+
+            System.out.print("Novo alimento: ");
+            String novoAlimento = scanner.nextLine();
+            if (!novoAlimento.isEmpty()) {
+                meal.alimento = novoAlimento;
+            }
+
+            System.out.print("Nova categoria: ");
+            String novaCategoria = scanner.nextLine();
+            if (!novaCategoria.isEmpty()) {
+                meal.categoria = novaCategoria;
+            }
+
+            System.out.print("Nova caloria: ");
+            String novaCaloria = scanner.nextLine();
+            if (!novaCaloria.isEmpty()) {
+                meal.caloria = Integer.parseInt(novaCaloria);
+            }
+
+            System.out.print("Nova proteína: ");
+            String novaProteina = scanner.nextLine();
+            if (!novaProteina.isEmpty()) {
+                meal.proteina = Double.parseDouble(novaProteina);
+            }
+
+            System.out.print("Novo carboidrato: ");
+            String novoCarbo = scanner.nextLine();
+            if (!novoCarbo.isEmpty()) {
+                meal.carboidrato = Double.parseDouble(novoCarbo);
+            }
+
+            System.out.print("Nova gordura: ");
+            String novaGordura = scanner.nextLine();
+            if (!novaGordura.isEmpty()) {
+                meal.gordura = Double.parseDouble(novaGordura);
+            }
+
+            System.out.print("Nova fibra: ");
+            String novaFibra = scanner.nextLine();
+            if (!novaFibra.isEmpty()) {
+                meal.fibra = Double.parseDouble(novaFibra);
+            }
+
+            System.out.print("Novo açúcar: ");
+            String novoAcucar = scanner.nextLine();
+            if (!novoAcucar.isEmpty()) {
+                meal.acucar = Double.parseDouble(novoAcucar);
+            }
+
+            System.out.print("Novo sódio: ");
+            String novoSodio = scanner.nextLine();
+            if (!novoSodio.isEmpty()) {
+                meal.sodio = Integer.parseInt(novoSodio);
+            }
+
+            System.out.print("Novo colesterol: ");
+            String novoColesterol = scanner.nextLine();
+            if (!novoColesterol.isEmpty()) {
+                meal.colesterol = Integer.parseInt(novoColesterol);
+            }
+
+            System.out.print("Novo tipo: ");
+            String novoTipo = scanner.nextLine();
+            if (!novoTipo.isEmpty()) {
+                meal.tipo = novoTipo;
+            }
+
+            System.out.print("Novo líquido: ");
+            String novoLiquido = scanner.nextLine();
+            if (!novoLiquido.isEmpty()) {
+                meal.liquido = Integer.parseInt(novoLiquido);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Erro ao atualizar dados: " + e.getMessage());
+            return;
         }
 
-        listaAlimento.adicionarAlimento(meal.alimento, meal.getUserId());
+        // Atualizar a lista invertida SE o alimento foi alterado
+        if (!alimentoAntigo.equalsIgnoreCase(meal.alimento)) {
+            listaAlimento.removerAlimento(alimentoAntigo, meal.getUserId());
+            listaAlimento.adicionarAlimento(meal.alimento, meal.getUserId());
+        }
 
-        System.out.println("Registro atualizado na lista invertida.");
+        // Atualizar o HashMap de registros (já está atualizado pois mexemos direto no
+        // objeto)
+
+        System.out.println("Registro atualizado com sucesso!");
     }
 
     private static void deletarRegistro() {
@@ -179,36 +271,43 @@ public class MainListaInvertida {
         }
     }
 
-    // Carregar a lista invertida a partir de dois arquivos binários
-    private static void carregarListaInvertidaBinario() {
-        try (DataInputStream dicionarioIn = new DataInputStream(new FileInputStream("dicionarioInvertido.dat"));
-                RandomAccessFile listasIn = new RandomAccessFile("listasInvertidas.da", "r")) {
+    private static void buscarMultiplosTermos() {
+        System.out.print("Digite os termos separados por espaço: ");
+        String linha = scanner.nextLine();
+        String[] termos = linha.toLowerCase().split("\\s+");
 
-            listaAlimento.getDicionario().clear();
+        Map<String, List<Integer>> resultadosIndividuais = new HashMap<>();
+        Set<Integer> uniao = new HashSet<>();
+        List<Integer> intersecao = null;
 
-            while (dicionarioIn.available() > 0) {
-                int tamanhoTermo = dicionarioIn.readInt();
-                byte[] termoBytes = new byte[tamanhoTermo];
-                dicionarioIn.readFully(termoBytes);
-                String termo = new String(termoBytes, "UTF-8");
+        // Buscar IDs para cada termo individualmente
+        for (String termo : termos) {
+            List<Integer> ids = listaAlimento.buscar(termo);
 
-                long posicaoLista = dicionarioIn.readLong();
+            resultadosIndividuais.put(termo, ids);
+            uniao.addAll(ids);
 
-                listasIn.seek(posicaoLista);
-                int quantidade = listasIn.readInt();
-
-                EntradaLista entrada = new EntradaLista(termo);
-                for (int i = 0; i < quantidade; i++) {
-                    int id = listasIn.readInt();
-                    entrada.adicionarReferencia(id);
-                }
-
-                listaAlimento.getDicionario().put(termo, entrada);
+            if (intersecao == null) {
+                intersecao = new ArrayList<>(ids);
+            } else {
+                intersecao.retainAll(ids); // interseção: só mantém quem aparece em todos
             }
+        }
 
-            System.out.println("Lista invertida carregada do binário com sucesso!");
-        } catch (IOException e) {
-            System.out.println("Erro ao carregar lista invertida binária: " + e.getMessage());
+        // Mostrar resultados individuais
+        System.out.println("\nResultados individuais por termo:");
+        for (String termo : termos) {
+            System.out.println("- Termo '" + termo + "' → IDs: " + resultadosIndividuais.get(termo));
+        }
+
+        // Mostrar total (união)
+        System.out.println("\nTotal de IDs encontrados (união de todos os termos): " + uniao);
+
+        // Mostrar interseção
+        if (intersecao == null || intersecao.isEmpty()) {
+            System.out.println("\nNenhum ID encontrado em comum (interseção vazia).");
+        } else {
+            System.out.println("\nIDs encontrados na interseção (presentes em todos os termos): " + intersecao);
         }
     }
 
