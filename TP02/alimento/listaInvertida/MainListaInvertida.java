@@ -22,11 +22,6 @@ public class MainListaInvertida {
             System.out.println("2. Buscar por Termo");
             System.out.println("3. Atualizar Registro");
             System.out.println("4. Deletar Registro");
-            System.out.println("5. Imprimir Lista Invertida");
-            System.out.println("6. Salvar Lista Invertida");
-            System.out.println("7. Carregar Lista Invertida");
-            System.out.println("8. Buscar por Múltiplos Termos");
-
             System.out.println("0. Sair");
             System.out.print("Escolha: ");
             opcao = scanner.nextInt();
@@ -45,19 +40,6 @@ public class MainListaInvertida {
                 case 4:
                     deletarRegistro();
                     break;
-                case 5:
-                    listaAlimento.imprimir();
-                    break;
-                case 6:
-                    salvarLista();
-                    break;
-                case 7:
-                    carregarLista();
-                    break;
-                case 8:
-                    buscarMultiplosTermos();
-                    break;
-
                 case 0:
                     System.out.println("Saindo...");
                     break;
@@ -69,6 +51,9 @@ public class MainListaInvertida {
     }
 
     private static void carregarCSV() throws IOException {
+        Files.deleteIfExists(Paths.get("dicionarioInvertido.bin"));
+        Files.deleteIfExists(Paths.get("listasInvertidas.bin"));
+
         try (BufferedReader br = Files.newBufferedReader(Paths.get(CSV_FILE))) {
             String linha;
             br.readLine(); // pula cabeçalho
@@ -99,7 +84,13 @@ public class MainListaInvertida {
                     System.out.println("Erro ao processar linha: " + linha);
                 }
             }
-            System.out.println("CSV carregado na lista invertida com sucesso!");
+
+            // Agora, imediatamente salva em arquivos binários
+            salvarListaInvertidaBinario();
+            System.out.println("CSV carregado e lista invertida salva em binário com sucesso!");
+
+        } catch (IOException e) {
+            System.out.println("Erro ao carregar CSV: " + e.getMessage());
         }
     }
 
@@ -112,9 +103,11 @@ public class MainListaInvertida {
             System.out.println("Nenhum registro encontrado para o termo.");
         } else {
             System.out.println("IDs encontrados: " + ids);
-            for (int id : ids) {
-                System.out.println(registros.get(id));
-            }
+            /*
+             * for (int id : ids) {
+             * System.out.println(registros.get(id));
+             * }
+             */
         }
     }
 
@@ -142,43 +135,6 @@ public class MainListaInvertida {
         System.out.println("Registro atualizado na lista invertida.");
     }
 
-    private static void salvarLista() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("listaInvertida.dat"))) {
-            oos.writeObject(listaAlimento);
-            System.out.println("Lista invertida salva com sucesso!");
-        } catch (IOException e) {
-            System.out.println("Erro ao salvar a lista invertida: " + e.getMessage());
-        }
-    }
-
-    private static void carregarLista() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("listaInvertida.dat"))) {
-            ListaInvertida carregada = (ListaInvertida) ois.readObject();
-            listaAlimento.getDicionario().clear();
-            listaAlimento.getDicionario().putAll(carregada.getDicionario());
-            System.out.println("Lista invertida carregada com sucesso!");
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Erro ao carregar a lista invertida: " + e.getMessage());
-        }
-    }
-
-    private static void buscarMultiplosTermos() {
-        System.out.print("Digite os termos separados por espaço: ");
-        String linha = scanner.nextLine();
-        String[] termos = linha.toLowerCase().split("\\s+");
-
-        List<Integer> ids = listaAlimento.buscarIntersecao(termos);
-
-        if (ids.isEmpty()) {
-            System.out.println("Nenhum registro encontrado que contenha todos os termos.");
-        } else {
-            System.out.println("IDs encontrados: " + ids);
-            for (int id : ids) {
-                System.out.println(registros.get(id));
-            }
-        }
-    }
-
     private static void deletarRegistro() {
         System.out.print("Informe o ID para deletar: ");
         int id = scanner.nextInt();
@@ -194,6 +150,66 @@ public class MainListaInvertida {
         registros.remove(id);
 
         System.out.println("Registro removido da lista invertida.");
+    }
+
+    // Salvar a lista invertida em dois arquivos binários
+    private static void salvarListaInvertidaBinario() {
+        try (DataOutputStream dicionarioOut = new DataOutputStream(new FileOutputStream("dicionarioInvertido.bin"));
+                DataOutputStream listasOut = new DataOutputStream(new FileOutputStream("listasInvertidas.bin"))) {
+
+            for (Map.Entry<String, EntradaLista> entry : listaAlimento.getDicionario().entrySet()) {
+                String termo = entry.getKey();
+                List<Integer> referencias = entry.getValue().getReferencias();
+
+                byte[] termoBytes = termo.getBytes("UTF-8");
+                dicionarioOut.writeInt(termoBytes.length);
+                dicionarioOut.write(termoBytes);
+
+                long posicaoLista = listasOut.size();
+                dicionarioOut.writeLong(posicaoLista);
+
+                listasOut.writeInt(referencias.size());
+                for (int id : referencias) {
+                    listasOut.writeInt(id);
+                }
+            }
+            System.out.println("Lista invertida salva em binário com sucesso!");
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar lista invertida binária: " + e.getMessage());
+        }
+    }
+
+    // Carregar a lista invertida a partir de dois arquivos binários
+    private static void carregarListaInvertidaBinario() {
+        try (DataInputStream dicionarioIn = new DataInputStream(new FileInputStream("dicionarioInvertido.dat"));
+                RandomAccessFile listasIn = new RandomAccessFile("listasInvertidas.da", "r")) {
+
+            listaAlimento.getDicionario().clear();
+
+            while (dicionarioIn.available() > 0) {
+                int tamanhoTermo = dicionarioIn.readInt();
+                byte[] termoBytes = new byte[tamanhoTermo];
+                dicionarioIn.readFully(termoBytes);
+                String termo = new String(termoBytes, "UTF-8");
+
+                long posicaoLista = dicionarioIn.readLong();
+
+                listasIn.seek(posicaoLista);
+                int quantidade = listasIn.readInt();
+
+                EntradaLista entrada = new EntradaLista(termo);
+                for (int i = 0; i < quantidade; i++) {
+                    int id = listasIn.readInt();
+                    entrada.adicionarReferencia(id);
+                }
+
+                listaAlimento.getDicionario().put(termo, entrada);
+            }
+
+            System.out.println("Lista invertida carregada do binário com sucesso!");
+        } catch (IOException e) {
+            System.out.println("Erro ao carregar lista invertida binária: " + e.getMessage());
+        }
     }
 
     private static int parseIntOrDefault(String str) {

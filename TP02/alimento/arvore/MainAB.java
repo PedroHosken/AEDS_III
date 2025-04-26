@@ -13,7 +13,6 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import TP02.alimento.hash.Meal;
 
 public class MainAB {
     
