@@ -18,7 +18,7 @@ public class MainAB {
     
     // Definição dos PATHS
     private static final String CSV_FILE = "TP01/alimento/daily_food_nutrition_dataset.csv";
-    private static final String BIN_FILE = "meals.bin";
+    private static final String B_BIN_FILE = "meals.bin";
     private static final Scanner scanner = new Scanner(System.in);
     private static final ArvoreB arvoreB = new ArvoreB(2);
 
@@ -38,16 +38,16 @@ public class MainAB {
             opcao = scanner.nextInt();
             switch (opcao) {
                 case 1:
-                    carregarCSV();
+                    carregarCSV_ArvoreB();
                     break;
                 case 2:
-                    lerRegistro();
+                    lerRegistro_ArvoreB();
                     break;
                 case 3:
-                    atualizarRegistro();
+                    atualizarRegistro_ArvoreB();
                     break;
                 case 4:
-                    deletarRegistro();
+                    deletarRegistro_ArvoreB();
                     break;
                 case 5:
                     System.out.println("Digite o número de arquivos que voce deseja usar: ");
@@ -56,7 +56,7 @@ public class MainAB {
                     System.out.println("Digite o número de registros que voce deseja usar: ");
                     int maxRegistros = scanner.nextInt();
 
-                    ordenacaoExterna(numCaminhos, maxRegistros);
+                    ordenacaoExterna_ArvoreB(numCaminhos, maxRegistros);
                     break;
 
                 case 0:
@@ -70,11 +70,11 @@ public class MainAB {
     }
 
     // =============================Carregar CSV para conversão em arquivo binário (Opção 1)===============================//
-    private static void carregarCSV() throws IOException {
-        Files.deleteIfExists(Paths.get(BIN_FILE));
+    private static void carregarCSV_ArvoreB() throws IOException {
+        Files.deleteIfExists(Paths.get(B_BIN_FILE));
     
         try (BufferedReader br = Files.newBufferedReader(Paths.get(CSV_FILE));
-             RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "rw")) {
+             RandomAccessFile raf = new RandomAccessFile(B_BIN_FILE, "rw")) {
     
             String linha;
             int id = 1;
@@ -144,7 +144,7 @@ public class MainAB {
     }
 
     // =============================Ler Registro (Opção 2)===============================//
-    private static void lerRegistro() throws IOException {
+    private static void lerRegistro_ArvoreB() throws IOException {
         System.out.print("Informe o ID para ler: ");
         int id = scanner.nextInt();
     
@@ -155,7 +155,7 @@ public class MainAB {
             return;
         }
     
-        try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile(B_BIN_FILE, "r")) {
             raf.seek(pos);
             byte lapide = raf.readByte();
             int tamanho = raf.readInt();
@@ -177,12 +177,12 @@ public class MainAB {
     
 
     // =============================Atualizar Registro (Opção 3)===============================//
-    private static void atualizarRegistro() throws IOException {
+    private static void atualizarRegistro_ArvoreB() throws IOException {
         System.out.print("Informe o ID para atualizar: ");
         int id = scanner.nextInt();
         scanner.nextLine();
     
-        try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "rw")) {
+        try (RandomAccessFile raf = new RandomAccessFile(B_BIN_FILE, "rw")) {
             Long pos = arvoreB.buscar(id);
     
             if (pos == null) {
@@ -288,7 +288,7 @@ public class MainAB {
     
 
     // =============================Deletar Registro (Opção 4)===============================//
-    private static void deletarRegistro() throws IOException {
+    private static void deletarRegistro_ArvoreB() throws IOException {
         System.out.print("Informe o ID para deletar: ");
         int id = scanner.nextInt();
     
@@ -299,7 +299,7 @@ public class MainAB {
             return;
         }
     
-        try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "rw")) {
+        try (RandomAccessFile raf = new RandomAccessFile(B_BIN_FILE, "rw")) {
             raf.seek(pos);
             byte lapide = raf.readByte();
     
@@ -319,13 +319,13 @@ public class MainAB {
     }
     
 // =======================realizar ordenação externa (Opção 5)=================================//
-    private static void ordenacaoExterna(int numCaminhos, int maxRegistros) throws IOException {
+    private static void ordenacaoExterna_ArvoreB(int numCaminhos, int maxRegistros) throws IOException {
         // Criação de lista de arquivos temporários para armazenar os blocos ordenados
         // o maxRegistros serão os registros que serão passados para a memória primaria
         // a cada ordenação
         List<File> arquivosTemporarios = new ArrayList<>();
 
-        try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile(B_BIN_FILE, "r")) {
             raf.seek(4); // Pula o cabeçalho do arquivo
 
             List<Meal> buffer = new ArrayList<>(); // Buffer em memória primaria que vai armazenar temp os registros
@@ -442,7 +442,7 @@ public class MainAB {
         PriorityQueue<DataPointer> fila = new PriorityQueue<>(Comparator.comparingInt(dp -> dp.meal.usuario));
         List<RandomAccessFile> readers = new ArrayList<>();
 
-        try (RandomAccessFile rafFinal = new RandomAccessFile(BIN_FILE, "rw")) {
+        try (RandomAccessFile rafFinal = new RandomAccessFile(B_BIN_FILE, "rw")) {
             rafFinal.setLength(0);
             rafFinal.writeInt(0);
 
@@ -511,7 +511,7 @@ public class MainAB {
             ArvoreB arvoreB = new ArvoreB(2); 
         }
     
-        try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile(B_BIN_FILE, "r")) {
             raf.seek(4); 
     
             while (raf.getFilePointer() < raf.length()) {

@@ -30,19 +30,19 @@ public class MainListaInvertida {
 
             switch (opcao) {
                 case 1:
-                    carregarCSV();
+                    carregarCSV_ListaInvertida();
                     break;
                 case 2:
-                    buscarTermo();
+                    buscarTermo_listaInvertida();
                     break;
                 case 3:
-                    atualizarRegistro();
+                    atualizarRegistro_ListaInvertida();
                     break;
                 case 4:
-                    deletarRegistro();
+                    deletarRegistro_ListaInvertida();
                     break;
                 case 5:
-                    buscarMultiplosTermos();
+                    buscarMultiplosTermos_ListaInvertida();
                     break;
                 case 0:
                     System.out.println("Saindo...");
@@ -54,7 +54,7 @@ public class MainListaInvertida {
         } while (opcao != 0);
     }
 
-    private static void carregarCSV() throws IOException {
+    private static void carregarCSV_ListaInvertida() throws IOException {
         Files.deleteIfExists(Paths.get("dicionarioInvertido.bin"));
         Files.deleteIfExists(Paths.get("listasInvertidas.bin"));
 
@@ -98,7 +98,7 @@ public class MainListaInvertida {
         }
     }
 
-    private static void buscarTermo() {
+    private static void buscarTermo_listaInvertida() {
         System.out.print("Digite o termo a buscar: ");
         String termo = scanner.nextLine();
 
@@ -115,7 +115,7 @@ public class MainListaInvertida {
         }
     }
 
-    private static void atualizarRegistro() {
+    private static void atualizarRegistro_ListaInvertida() {
         System.out.print("Informe o ID para atualizar: ");
         int id = scanner.nextInt();
         scanner.nextLine(); // Consumir quebra de linha
@@ -227,7 +227,7 @@ public class MainListaInvertida {
         System.out.println("Registro atualizado com sucesso!");
     }
 
-    private static void deletarRegistro() {
+    private static void deletarRegistro_ListaInvertida() {
         System.out.print("Informe o ID para deletar: ");
         int id = scanner.nextInt();
         scanner.nextLine();
@@ -271,7 +271,7 @@ public class MainListaInvertida {
         }
     }
 
-    private static void buscarMultiplosTermos() {
+    private static void buscarMultiplosTermos_ListaInvertida() {
         System.out.print("Digite os termos separados por espaço: ");
         String linha = scanner.nextLine();
         String[] termos = linha.toLowerCase().split("\\s+");

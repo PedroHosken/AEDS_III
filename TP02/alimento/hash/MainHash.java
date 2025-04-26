@@ -10,7 +10,7 @@ import java.util.*;
 public class MainHash {
 
     private static final String CSV_FILE = "TP01/alimento/daily_food_nutrition_dataset.csv";
-    private static final String BIN_FILE = "meals_hash.bin";
+    private static final String HASH_BIN_FILE = "meals_hash.bin";
     private static final Scanner scanner = new Scanner(System.in);
 
     // Define profundidade inicial e capacidade por bucket
@@ -31,16 +31,16 @@ public class MainHash {
 
             switch (opcao) {
                 case 1:
-                    carregarCSV();
+                    carregarCSV_Hash();
                     break;
                 case 2:
-                    lerRegistro();
+                    lerRegistro_hash();
                     break;
                 case 3:
-                    atualizarRegistro();
+                    atualizarRegistro_hash();
                     break;
                 case 4:
-                    deletarRegistro();
+                    deletarRegistro_hash();
                     break;
                 case 0:
                     System.out.println("Saindo...");
@@ -53,11 +53,11 @@ public class MainHash {
         } while (opcao != 0);
     }
 
-    private static void carregarCSV() throws IOException {
-        Files.deleteIfExists(Paths.get(BIN_FILE));
+    private static void carregarCSV_Hash() throws IOException {
+        Files.deleteIfExists(Paths.get(HASH_BIN_FILE));
 
         try (BufferedReader br = Files.newBufferedReader(Paths.get(CSV_FILE));
-                RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "rw")) {
+                RandomAccessFile raf = new RandomAccessFile(HASH_BIN_FILE, "rw")) {
 
             String linha;
             br.readLine(); // pula cabeçalho
@@ -119,7 +119,7 @@ public class MainHash {
         }
     }
 
-    private static void lerRegistro() throws IOException {
+    private static void lerRegistro_hash() throws IOException {
         System.out.print("Informe o ID do usuário: ");
         int id = scanner.nextInt();
 
@@ -127,7 +127,7 @@ public class MainHash {
 
         for (Entrada entrada : bucket.getRegistros()) {
             if (entrada.getChave() == id) {
-                try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "r")) {
+                try (RandomAccessFile raf = new RandomAccessFile(HASH_BIN_FILE, "r")) {
                     raf.seek(entrada.getPosicaoArquivo());
                     byte lapide = raf.readByte();
                     int tamanho = raf.readInt();
@@ -150,7 +150,7 @@ public class MainHash {
         System.out.println("Registro não encontrado.");
     }
 
-    private static void deletarRegistro() throws IOException {
+    private static void deletarRegistro_hash() throws IOException {
         System.out.print("Informe o ID para deletar: ");
         int id = scanner.nextInt();
 
@@ -169,7 +169,7 @@ public class MainHash {
             return;
         }
 
-        try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "rw")) {
+        try (RandomAccessFile raf = new RandomAccessFile(HASH_BIN_FILE, "rw")) {
             raf.seek(entradaParaRemover.getPosicaoArquivo());
             raf.writeByte(0); // marca como removido
         }
@@ -178,7 +178,7 @@ public class MainHash {
         System.out.println("Registro removido com sucesso.");
     }
 
-    private static void atualizarRegistro() throws IOException {
+    private static void atualizarRegistro_hash() throws IOException {
         System.out.print("Informe o ID para atualizar: ");
         int id = scanner.nextInt();
         scanner.nextLine();
@@ -198,7 +198,7 @@ public class MainHash {
             return;
         }
 
-        try (RandomAccessFile raf = new RandomAccessFile(BIN_FILE, "rw")) {
+        try (RandomAccessFile raf = new RandomAccessFile(HASH_BIN_FILE, "rw")) {
             raf.seek(entradaOriginal.getPosicaoArquivo());
             byte lapide = raf.readByte();
             int tamanhoOriginal = raf.readInt();
