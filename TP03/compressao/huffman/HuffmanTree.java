@@ -1,4 +1,4 @@
-package TP03.compressao.huffman; // Ou o seu pacote correspondente
+package TP03.compressao.huffman;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,62 +6,60 @@ import java.util.PriorityQueue;
 
 public class HuffmanTree {
 
-    public HuffmanNode raiz; // Raiz da árvore de Huffman
+    public HuffmanNode raiz;
 
-    // Construtor que constrói a árvore a partir de um mapa de frequências de bytes
+    /**
+     * Constrói a árvore de Huffman a partir de um mapa de frequências de bytes.
+     * 
+     * @param mapaFrequencias Mapa contendo cada byte e sua respectiva frequência.
+     */
     public HuffmanTree(Map<Byte, Integer> mapaFrequencias) {
         if (mapaFrequencias == null || mapaFrequencias.isEmpty()) {
-            // Tratar caso de mapa vazio ou nulo, talvez lançar uma exceção
-            // ou criar uma árvore vazia/nula.
             this.raiz = null;
             return;
         }
 
-        // 1. Criar uma fila de prioridade para os nós folha
+        // 1. Cria uma fila de prioridade para armazenar os nós da árvore.
         PriorityQueue<HuffmanNode> filaPrioridade = new PriorityQueue<>();
 
-        // 2. Para cada símbolo no mapa de frequências, criar um nó folha e adicionar à
-        // fila
+        // 2. Cria um nó folha para cada símbolo com frequência > 0 e o adiciona à fila.
         for (Map.Entry<Byte, Integer> entrada : mapaFrequencias.entrySet()) {
-            if (entrada.getValue() > 0) { // Apenas símbolos com frequência > 0
+            if (entrada.getValue() > 0) {
                 filaPrioridade.add(new HuffmanNode(entrada.getKey(), entrada.getValue()));
             }
         }
 
-        // Caso especial: se houver apenas um tipo de símbolo no arquivo
-        if (filaPrioridade.size() == 1) {
-            HuffmanNode unicoNo = filaPrioridade.poll();
-            // Criar um nó pai artificial para ter um caminho (código '0' por exemplo)
-            // ou definir uma convenção para este caso.
-            // Uma abordagem comum é criar um nó pai com o únicoNo como filho esquerdo (ou
-            // direito)
-            // e o outro filho nulo ou um nó placeholder se necessário para a lógica de
-            // código.
-            // Para simplificar, podemos apenas ter o nó único como raiz,
-            // e a lógica de geração de código precisará lidar com isso (ex: código "0").
-            // No entanto, para formar uma árvore binária propriamente dita para o
-            // algoritmo,
-            // mesmo com um único símbolo, é comum criar um nó pai.
-            // Vamos seguir a lógica de combinar até sobrar um. Se só tem um, ele é a raiz.
-            // A geração de código para uma árvore com apenas um nó (raiz=folha) é um caso
-            // especial.
-            this.raiz = unicoNo; // Se só há um nó, ele é a raiz.
-                                 // A geração de códigos tratará o código como "0" ou "1".
-        } else {
-            // 3. Construir a árvore combinando os nós
-            while (filaPrioridade.size() > 1) {
-                HuffmanNode filhoEsquerda = filaPrioridade.poll();
-                HuffmanNode filhoDireita = filaPrioridade.poll();
+        // 3. Constrói a árvore:
+        // Enquanto houver mais de um nó na fila, combina os dois nós de menor
+        // frequência
+        // em um novo nó pai, que é reinserido na fila.
+        // Trata o caso de arquivo com apenas um tipo de símbolo (filaPrioridade.size()
+        // == 1).
+        while (filaPrioridade.size() > 1) {
+            HuffmanNode filhoEsquerda = filaPrioridade.poll();
+            HuffmanNode filhoDireita = filaPrioridade.poll();
 
-                HuffmanNode pai = new HuffmanNode(filhoEsquerda, filhoDireita);
-                filaPrioridade.add(pai);
-            }
-            // 4. O último nó na fila é a raiz da árvore de Huffman
+            HuffmanNode pai = new HuffmanNode(filhoEsquerda, filhoDireita);
+            filaPrioridade.add(pai);
+        }
+
+        // 4. O nó restante na fila é a raiz da árvore de Huffman.
+        // Se a fila estiver vazia (mapaFrequencias original vazio ou sem frequências >
+        // 0), raiz será null.
+        if (!filaPrioridade.isEmpty()) {
             this.raiz = filaPrioridade.poll();
+        } else {
+            this.raiz = null; // Garante que a raiz seja nula se não houver nós.
         }
     }
 
-    // Método para gerar o mapa de códigos de Huffman (Byte -> String de bits)
+    /**
+     * Gera o mapa de códigos de Huffman (Byte -> String de bits) para os símbolos
+     * da árvore.
+     * 
+     * @return Um mapa onde a chave é o byte e o valor é seu código Huffman em
+     *         formato de String.
+     */
     public Map<Byte, String> gerarMapaDeCodigos() {
         Map<Byte, String> mapaCodigos = new HashMap<>();
         if (this.raiz != null) {
@@ -70,34 +68,32 @@ public class HuffmanTree {
         return mapaCodigos;
     }
 
-    // Método auxiliar recursivo para gerar os códigos
+    /**
+     * Método auxiliar recursivo para atravessar a árvore e gerar os códigos.
+     * 
+     * @param no          Nó atual na travessia.
+     * @param codigoAtual Código binário acumulado até o nó atual.
+     * @param mapaCodigos Mapa a ser preenchido com os códigos dos símbolos.
+     */
     private void gerarCodigosRecursivo(HuffmanNode no, String codigoAtual, Map<Byte, String> mapaCodigos) {
         if (no == null) {
             return;
         }
 
-        // Se é um nó folha, encontramos um símbolo e seu código
+        // Se é um nó folha, armazena o símbolo e seu código correspondente.
         if (no.isFolha()) {
-            // Caso especial: árvore com apenas um nó (raiz é folha)
+            // Convenção para árvore com apenas um símbolo: código "0".
+            // Se o nó raiz for uma folha, o codigoAtual estará vazio.
             if (codigoAtual.isEmpty() && no.simbolo != null) {
-                // Se a árvore só tem um símbolo, por convenção, damos um código simples como
-                // "0"
                 mapaCodigos.put(no.simbolo, "0");
-            } else if (no.simbolo != null) { // Checagem extra para garantir que é um símbolo válido
+            } else if (no.simbolo != null) { // Para nós folha em árvores maiores.
                 mapaCodigos.put(no.simbolo, codigoAtual);
             }
             return;
         }
 
-        // Se não é folha, continua para os filhos
-        // Adiciona '0' para a esquerda e '1' para a direita (convenção comum)
+        // Continua a travessia: '0' para esquerda, '1' para direita.
         gerarCodigosRecursivo(no.esquerda, codigoAtual + "0", mapaCodigos);
         gerarCodigosRecursivo(no.direita, codigoAtual + "1", mapaCodigos);
     }
-
-    // Outros métodos podem ser adicionados aqui, como:
-    // - Um método para serializar a árvore (ou as frequências) para o cabeçalho do
-    // arquivo.
-    // - Um construtor estático para reconstruir a árvore a partir dos dados do
-    // cabeçalho.
 }
