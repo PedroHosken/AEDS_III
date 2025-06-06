@@ -1,4 +1,5 @@
 package TP02.alimento.src;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -11,11 +12,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
 public class Main {
-    
 
-    private static final String CSV_FILE = "TP01/alimento/daily_food_nutrition_dataset.csv";
+    private static final String CSV_FILE = "TP02/alimento/daily_food_nutrition_dataset.csv";
     private static final String B_BIN_FILE = "meals.bin";
     private static final Scanner scanner = new Scanner(System.in);
     private static final ArvoreB arvoreB = new ArvoreB(2);
@@ -33,9 +32,11 @@ public class Main {
             System.out.println("1. Árvore B");
             System.out.println("2. Hash");
             System.out.println("3. Lista Invertida");
+            System.out.println("4. Casamento de Padrões"); 
             System.out.println("0. Sair");
             System.out.print("Escolha: ");
             escolhaIndice = scanner.nextInt();
+            scanner.nextLine(); // Consumir quebra de linha
 
             switch (escolhaIndice) {
                 case 1:
@@ -46,6 +47,9 @@ public class Main {
                     break;
                 case 3:
                     menuListaInvertida(scanner);
+                    break;
+                case 4: 
+                    menuCasamentoPadroes(scanner);
                     break;
                 case 0:
                     System.out.println("Encerrando o programa...");
@@ -58,7 +62,97 @@ public class Main {
 
         scanner.close();
     }
+    
+    // ============================= MENU DO CASAMENTO DE PADRÕES ===============================//
+    private static void menuCasamentoPadroes(Scanner scanner) {
+        int opcao;
+        do {
+            System.out.println("\n--- Menu Casamento de Padrões ---");
+            System.out.println("Qual algoritmo deseja usar para buscar um padrão no campo 'alimento'?");
+            System.out.println("1. KMP (Knuth-Morris-Pratt)");
+            System.out.println("2. Boyer-Moore");
+            System.out.println("0. Voltar");
+            System.out.print("Escolha uma opção: ");
+            opcao = scanner.nextInt();
+            scanner.nextLine(); // Consumir quebra de linha
 
+            switch (opcao) {
+                case 1:
+                    buscarPadrao("KMP");
+                    break;
+                case 2:
+                    buscarPadrao("BoyerMoore");
+                    break;
+                case 0:
+                    System.out.println("Voltando ao menu principal...");
+                    break;
+                default:
+                    System.out.println("Opção inválida!");
+                    break;
+            }
+        } while (opcao != 0);
+    }
+
+    // ============================= BUSCA DE PADRÃO ===============================//
+    private static void buscarPadrao(String algoritmo) {
+        System.out.print("Digite o padrão a ser buscado no campo 'alimento': ");
+        String padrao = scanner.nextLine().toLowerCase(); // Busca case-insensitive
+
+        if (padrao.isEmpty()) {
+            System.out.println("O padrão não pode ser vazio.");
+            return;
+        }
+
+        int matchesCount = 0;
+        System.out.println("\nBuscando por '" + padrao + "' usando " + algoritmo + "...");
+
+        try (RandomAccessFile raf = new RandomAccessFile(B_BIN_FILE, "r")) {
+            if (raf.length() == 0) {
+                System.out.println("O arquivo " + B_BIN_FILE + " está vazio ou não existe. Carregue os dados primeiro (Menu Árvore B -> Opção 1).");
+                return;
+            }
+
+            raf.seek(4); // Pula o cabeçalho do arquivo
+
+            while (raf.getFilePointer() < raf.length()) {
+                long pos = raf.getFilePointer();
+                byte lapide = raf.readByte();
+                int tamanho = raf.readInt();
+                byte[] data = new byte[tamanho];
+                raf.readFully(data);
+
+                if (lapide == 1) { // Processa apenas registros ativos
+                    Meal meal = new Meal();
+                    meal.fromByteArray(data);
+                    String textoAlimento = meal.alimento.toLowerCase(); // Busca case-insensitive
+
+                    int foundIndex = -1;
+                    if (algoritmo.equals("KMP")) {
+                        foundIndex = KMP.search(textoAlimento, padrao);
+                    } else if (algoritmo.equals("BoyerMoore")) {
+                        foundIndex = BoyerMoore.search(textoAlimento, padrao);
+                    }
+
+                    if (foundIndex != -1) {
+                        matchesCount++;
+                        System.out.println("\n--- Padrão Encontrado (Registro ID: " + meal.getUserId() + " na posição " + pos + ") ---");
+                        System.out.println(meal);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler o arquivo binário: " + e.getMessage());
+            System.out.println("Certifique-se de que o arquivo '" + B_BIN_FILE + "' foi criado corretamente (Menu Árvore B -> Opção 1).");
+        }
+
+        if (matchesCount > 0) {
+            System.out.println("\nBusca concluída. Total de registros encontrados: " + matchesCount);
+        } else {
+            System.out.println("\nNenhum registro contendo o padrão '" + padrao + "' foi encontrado.");
+        }
+    }
+
+    // ============================= MENU DA ARVORE B ===============================//
 
     private static void menuArvoreB(Scanner scanner) {
         int opcao;
@@ -103,7 +197,8 @@ public class Main {
         } while (opcao != 0);
     }
 
-    
+    // ============================= MENU DO HASH ===============================//
+
 
     private static void menuHash(Scanner scanner) throws IOException{
         int opcao;
@@ -139,6 +234,9 @@ public class Main {
             }
         } while (opcao != 0);
     }
+
+
+    // ============================= MENU DA LISTA INVERTIDA ===============================//
 
     private static void menuListaInvertida(Scanner scanner) throws IOException{
         int opcao;
@@ -179,6 +277,9 @@ public class Main {
             }
         } while (opcao != 0);
     }
+
+
+    // =============================Carregar arquivo binário (Opção 1)===============================//
 
     private static void carregarCSV_ArvoreB() {
         try {
@@ -1173,6 +1274,4 @@ public class Main {
             System.out.println("\nIDs encontrados na interseção (presentes em todos os termos): " + intersecao);
         }
     }
-
 }
-    
